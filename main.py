@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from pprint import pprint
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
+import telegram
+
 
 load_dotenv()
 API_KEY = os.environ.get('API_KEY')
@@ -46,11 +48,9 @@ def load_nasa_epic_pictures(nasa_epic_data_url):
     nasa_epic_picture_data = response.json()
     response.raise_for_status()
     for iteration_index, nasa_epic_launch_data in enumerate(nasa_epic_picture_data):
-        pprint(nasa_epic_launch_data)
         launch_date = nasa_epic_launch_data['date'].split(' ')[0].replace('-', '/')
         image_name = nasa_epic_launch_data['image']
         nasa_epic_url = f'https://api.nasa.gov/EPIC/archive/natural/{launch_date}/png/{image_name}.png?api_key={API_KEY}'
-        print(nasa_epic_url)
         response = requests.get(nasa_epic_url)
         response.raise_for_status()
         filename = f'images/nasa_epic_images/nasa_epic_image_{iteration_index}.png'
@@ -65,6 +65,10 @@ def get_picture_extension(picture_link):
 
 
 if __name__ == '__main__':
-    '''load_spacex_pictures(spacex_launch_data_url)'''
-    '''load_nasa_apod_pictures(nasa_apod_data_url)'''
-    load_nasa_epic_pictures(nasa_epic_data_url)
+    '''load_spacex_pictures(spacex_launch_data_url)
+    load_nasa_apod_pictures(nasa_apod_data_url)
+    load_nasa_epic_pictures(nasa_epic_data_url)'''
+    TOKEN = os.getenv('TOKEN')
+    bot = telegram.Bot(token=TOKEN)
+    bot.send_message(text='Bruh', chat_id='@bruhmomentcertified')
+    bot.send_document(chat_id=chat_id, document=open('tests/test.png', 'rb'))
