@@ -6,10 +6,12 @@ from pprint import pprint
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 import telegram
+import random
 
 
 load_dotenv()
 API_KEY = os.environ.get('API_KEY')
+space_pic_dirs = ['images/nasa_epic_images', 'images/nasa_images', 'images/spacex_images']
 nasa_epic_data_url = f'https://api.nasa.gov/EPIC/api/natural/images?api_key={API_KEY}'
 spacex_launch_data_url = 'https://api.spacexdata.com/v3/launches/64'
 nasa_apod_data_url = f'https://api.nasa.gov/planetary/apod?api_key={API_KEY}&count=50'
@@ -59,6 +61,13 @@ def load_nasa_epic_pictures(nasa_epic_data_url):
         out.close()
 
 
+def choose_picture(space_pic_dirs):
+    random_dir = random.choice(space_pic_dirs)
+    random_pic = random.choice(os.listdir(random_dir))
+    return f'{random_dir}/{random_pic}'
+
+
+
 def get_picture_extension(picture_link):
     _, extension = os.path.splitext(picture_link)
     return extension
@@ -69,6 +78,8 @@ if __name__ == '__main__':
     load_nasa_apod_pictures(nasa_apod_data_url)
     load_nasa_epic_pictures(nasa_epic_data_url)'''
     TOKEN = os.getenv('TOKEN')
+    CHAT_ID = os.getenv('CHAT_ID')
     bot = telegram.Bot(token=TOKEN)
-    bot.send_message(text='Bruh', chat_id='@bruhmomentcertified')
-    bot.send_document(chat_id=chat_id, document=open('tests/test.png', 'rb'))
+    bot.send_message(text='Here`s your daily space picture dose!', chat_id='@bruhmomentcertified')
+    random_picture_for_posting = choose_picture(space_pic_dirs)
+    bot.send_document(chat_id=CHAT_ID, document=open(random_picture_for_posting, 'rb'))
