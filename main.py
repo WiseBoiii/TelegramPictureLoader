@@ -74,9 +74,9 @@ def get_picture_extension(picture_link):
 
 
 if __name__ == '__main__':
-    '''load_spacex_pictures(spacex_launch_data_url)
+    load_spacex_pictures(spacex_launch_data_url)
     load_nasa_apod_pictures(nasa_apod_data_url)
-    load_nasa_epic_pictures(nasa_epic_data_url)'''
+    load_nasa_epic_pictures(nasa_epic_data_url)
     TOKEN = os.getenv('TOKEN')
     CHAT_ID = os.getenv('CHAT_ID')
     bot = telegram.Bot(token=TOKEN)
