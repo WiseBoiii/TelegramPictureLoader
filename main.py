@@ -2,7 +2,6 @@ import requests
 import json
 import os
 from dotenv import load_dotenv
-from pprint import pprint
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 import telegram
