@@ -75,9 +75,9 @@ def get_picture_extension(picture_link):
 
 
 if __name__ == '__main__':
-    '''load_spacex_pictures(spacex_launch_data_url)
+    load_spacex_pictures(spacex_launch_data_url)
     load_nasa_apod_pictures(nasa_apod_data_url)
-    load_nasa_epic_pictures(nasa_epic_data_url)'''
+    load_nasa_epic_pictures(nasa_epic_data_url)
     TOKEN = os.getenv('TOKEN')
     CHAT_ID = os.getenv('CHAT_ID')
     bot = telegram.Bot(token=TOKEN)
@@ -85,4 +85,4 @@ if __name__ == '__main__':
         bot.send_message(text='Here`s your daily space picture dose!', chat_id='@bruhmomentcertified')
         random_picture_for_posting = choose_picture(space_pic_dirs)
         bot.send_document(chat_id=CHAT_ID, document=open(random_picture_for_posting, 'rb'))
-        sleep(10)
+        sleep(3600)
