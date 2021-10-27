@@ -19,12 +19,12 @@ CHAT_ID=@bruhmomentcertified
 + О том, как получить chat id можно узнать [***здесь***](https://it-stories.ru/blog/web-dev/kak-uznat-chat-id-dlja-kanala-gruppy-telegram/)
 
 ### Нужные вам команды
-```
-cd C:\Path to repository - Вы перейдете в папку с репозиторием
-python -m venv name of venv - С помощью этого вы создадите свое виртуальное окружение
-pip install -r requirements.txt - С помощью этого вы установите нужные вам библиотеки
-python main.py - Это запустит код и покажет вам возможные аргументы для запуска
-```
+
+```cd C:\Path to repository``` - Вы перейдете в папку с репозиторием
+```python -m venv name of venv``` - С помощью этого вы создадите свое виртуальное окружение
+```pip install -r requirements.txt``` - С помощью этого вы установите нужные вам библиотеки
+```python main.py``` - Это запустит код и покажет вам возможные аргументы для запуска
+
 
 В течение минуты после запуска вы увидите в своем Telegram канале сообщение с картинкой
 
