@@ -1,21 +1,21 @@
-import requests
-import json
-import os
-from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
-import telegram
 import random
 from time import sleep
 from urllib.parse import urlparse
+import os
+
+import requests
+from dotenv import load_dotenv
+import telegram
+
+
 
 
 def load_spacex_pictures():
-    spacex_launch_data_url = 'https://api.spacexdata.com/v3/launches/64'
-    response = requests.get(spacex_launch_data_url)
+    spacex_launch_url = 'https://api.spacexdata.com/v3/launches/64'
+    response = requests.get(spacex_launch_url)
     response.raise_for_status()
-    launch_data = response.json()
-    flickr_links = launch_data['links']['flickr_images'][:]
+    spacex_launch = response.json()
+    flickr_links = spacex_launch['links']['flickr_images'][:]
     for iteration_index, picture_link in enumerate(flickr_links):
         picture_name = f'spacex_image_{iteration_index}'
         picture_directory = 'images/spacex_images'
@@ -24,42 +24,45 @@ def load_spacex_pictures():
 
 def load_nasa_apod_pictures(nasa_api_key):
     payload = {'api_key': nasa_api_key, 'count': 50}
-    nasa_apod_data_url = f'https://api.nasa.gov/planetary/apod'
-    response = requests.get(nasa_apod_data_url, params=payload)
-    nasa_apod_data = response.json()
+    nasa_apod_url = f'https://api.nasa.gov/planetary/apod'
+    response = requests.get(nasa_apod_url, params=payload)
     response.raise_for_status()
-    failed_picture_urls = []
-    for iteration_index, nasa_apod_data in enumerate(nasa_apod_data):
-        if nasa_apod_data['url'] == '':
-            pass
-        nasa_apod_url = nasa_apod_data['url']
-        url_error_test = urlparse(nasa_apod_url)
-        if 'youtube' in url_error_test.netloc:
-            failed_picture_urls.append(nasa_apod_url)
-        else:
-            picture_name = f'nasa_apod_image_{iteration_index}'
-            picture_directory = 'images/nasa_apod_images'
-            download_picture(nasa_apod_url, picture_name, picture_directory)
+    nasa_apod = response.json()
+    print(nasa_apod)
+    for iteration_index, nasa_apod in enumerate(nasa_apod):
+        nasa_apod_url = nasa_apod['url']
+        print(nasa_apod_url)
+        picture_url_test(nasa_apod_url, iteration_index)
+
+
+def picture_url_test(failed_picture_urls, nasa_apod_url, iteration_index=''):
+    url_error_test = urlparse(nasa_apod_url)
+    if 'youtube' in url_error_test.netloc:
+        failed_picture_urls.append(nasa_apod_url)
+    else:
+        picture_name = f'nasa_apod_image_{iteration_index}'
+        picture_directory = 'images/nasa_apod_images'
+        download_picture(nasa_apod_url, picture_name, picture_directory)
     return failed_picture_urls
 
 
 def load_nasa_epic_pictures(nasa_api_key):
     payload = {'api_key': nasa_api_key}
-    nasa_epic_data_url = f'https://api.nasa.gov/EPIC/api/natural/images'
-    response = requests.get(nasa_epic_data_url, params=payload)
-    nasa_epic_picture_data = response.json()
+    nasa_epic_url = f'https://api.nasa.gov/EPIC/api/natural/images'
+    response = requests.get(nasa_epic_url, params=payload)
     response.raise_for_status()
-    for iteration_index, nasa_epic_launch_data in enumerate(nasa_epic_picture_data):
-        launch_date = nasa_epic_launch_data['date'].split(' ')[0].replace('-', '/')
-        image_name = nasa_epic_launch_data['image']
-        nasa_epic_url = f'https://api.nasa.gov/EPIC/archive/natural/{launch_date}/png/{image_name}.png?api_key={nasa_api_key}'
+    nasa_epic_picture = response.json()
+    for iteration_index, nasa_epic_launch in enumerate(nasa_epic_picture):
+        launch_date = nasa_epic_launch['date'].split(' ')[0].replace('-', '/')
+        image_name = nasa_epic_launch['image']
+        nasa_epic_url = f'https://api.nasa.gov/EPIC/archive/natural/{launch_date}/png/{image_name}.png'
         picture_name = f'nasa_epic_image_{iteration_index}'
         picture_directory = 'images/nasa_epic_images'
-        download_picture(nasa_epic_url, picture_name, picture_directory)
+        download_picture(nasa_epic_url, picture_name, picture_directory, payload)
 
 
-def download_picture(picture_link, picture_name, picture_directory):
-    response = requests.get(picture_link)
+def download_picture(picture_link, picture_name, picture_directory, payload=''):
+    response = requests.get(picture_link, params=payload)
     response.raise_for_status()
     picture_extension = get_picture_extension(picture_link)
     filename = f'{picture_directory}/{picture_name}{picture_extension}'
@@ -67,10 +70,13 @@ def download_picture(picture_link, picture_name, picture_directory):
         filename.write(response.content)
 
 
-def choose_picture(space_pic_dirs):
-    random_dir = random.choice(space_pic_dirs)
-    random_pic = random.choice(os.listdir(random_dir))
-    return f'{random_dir}/{random_pic}'
+def choose_random_picture_or_url(space_pic_dirs, video_urls):
+    random_video_url = random.choice(video_urls)
+    random_picture_dir = random.choice(space_pic_dirs)
+    random_pic = random.choice(os.listdir(random_picture_dir))
+    chosen_random_picture = f'{random_picture_dir}/{random_pic}'
+    random_post = random.choice(chosen_random_picture, random_video_url)
+    return random_post
 
 
 def get_picture_extension(picture_link):
@@ -79,22 +85,28 @@ def get_picture_extension(picture_link):
     return extension
 
 
-def upload_pictures_to_chat(telegram_chat_id):
-    while True:
-        bot.send_message(text='Here`s your daily space picture dose!', chat_id=telegram_chat_id)
-        random_picture_for_posting = choose_picture(space_pic_dirs)
-        bot.send_document(chat_id=telegram_chat_id, document=open(random_picture_for_posting, 'rb'))
-        sleep(3600)
+def upload_post_to_chat(telegram_chat_id, space_pic_dirs):
+    get_random_post = choose_random_picture_or_url(space_pic_dirs, video_urls)
+    if type(get_random_post) == str:
+        bot.send_message(text="Today we have a video about space for you to see!", chat_id=telegram_chat_id)
+        bot.send_message(text=get_random_post, chat_id=telegram_chat_id)
+    else:
+        with open(get_random_post) as document:
+            bot.send_message(text="Today we have a space picture for you to see!", chat_id=telegram_chat_id)
+            bot.send_document('rb', chat_id=telegram_chat_id, document=document)
 
 
 if __name__ == '__main__':
+    failed_picture_urls = []
     load_dotenv()
     nasa_api_key = os.getenv('NASA_API_KEY')
     space_pic_dirs = ['images/nasa_epic_images', 'images/nasa_apod_images', 'images/spacex_images']
-    load_spacex_pictures()
-    video_urls = load_nasa_apod_pictures(nasa_api_key)
-    load_nasa_epic_pictures(nasa_api_key)
     telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
     telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
     bot = telegram.Bot(token=telegram_bot_token)
-    upload_pictures_to_chat(telegram_chat_id)
+    while True:
+        load_spacex_pictures()
+        video_urls = load_nasa_apod_pictures(nasa_api_key)
+        load_nasa_epic_pictures(nasa_api_key)
+        upload_post_to_chat(telegram_chat_id, space_pic_dirs)
+        sleep(86400)
