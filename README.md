@@ -10,9 +10,9 @@
 + Нужен chat_id вашего Telegram канала, для получения которого важно чтобы ваш канал был публичным. 
 + Вы создали файл ```.env``` в папке репозитория, который выглядит **ПРИМЕРНО** так:
 ```
-API_KEY=pjRZouSxbe48eWrCIsQNqnpjLbYHIggOOMhIwUuH
-TOKEN=2049864829:AAEgK-iQ0zLtWhHwq5h9x7Llwd95wp_UgxY
-CHAT_ID=@bruhmomentcertified
+NASA_API_KEY=WbLQBfUN01G85Adhr4GLCWruKdU3nznGuHtcXzfB
+TELEGRAM_BOT_TOKEN=2049864829:AAEgK-iQ0zLtWhHwq5h9x7Llwd95wp_UgxY
+TELEGRAM_CHAT_ID=@bruhmomentcertified
 ```
 + Ваш API_KEY можно получить [***здесь***](https://api.nasa.gov/) в разделе Generate API Key.
 + Про получение токена можно узнать [***здесь***](https://way23.ru/регистрация-бота-в-telegram.html)
