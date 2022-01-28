@@ -10,9 +10,9 @@
 + Нужен chat_id вашего Telegram канала, для получения которого важно чтобы ваш канал был публичным. 
 + Вы создали файл ```.env``` в папке репозитория, который выглядит **ПРИМЕРНО** так:
 ```
-API_KEY=pjRZouSxbe48eWrCIsQNqnpjLbYHIggOOMhIwUuH
-TOKEN=2049864829:AAEgK-iQ0zLtWhHwq5h9x7Llwd95wp_UgxY
-CHAT_ID=@bruhmomentcertified
+NASA_API_KEY=WbLQBfUN01G85Adhr4GLCWruKdU3nznGuHtcXzfB
+TELEGRAM_BOT_TOKEN=2049864829:AAEgK-iQ0zLtWhHwq5h9x7Llwd95wp_UgxY
+TELEGRAM_CHAT_ID=@bruhmomentcertified
 ```
 + Ваш API_KEY можно получить [***здесь***](https://api.nasa.gov/) в разделе Generate API Key.
 + Про получение токена можно узнать [***здесь***](https://way23.ru/регистрация-бота-в-telegram.html)
@@ -24,19 +24,11 @@ CHAT_ID=@bruhmomentcertified
 ```
 cd C:\Path to repository
 ``` 
-2) Вы скачаете библиотеку для установки виртуального окружения
-```
-pip install virtualenv
-``` 
-3) С помощью этого вы создадите свое виртуальное окружение
-```
-python -m venv name of venv
-```
-4) С помощью этого вы установите нужные вам библиотеки
+2) С помощью этого вы установите нужные вам библиотеки
 ```
 pip install -r requirements.txt
 ``` 
-5) Это запустит код и покажет вам возможные аргументы для запуска
+3) Это запустит код и покажет вам возможные аргументы для запуска
 ```
 python main.py
 ```
