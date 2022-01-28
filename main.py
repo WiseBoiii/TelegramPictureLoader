@@ -37,15 +37,6 @@ def load_nasa_apod_picture_urls(nasa_api_key, picture_amount):
     return urls
 
 
-def get_video_trapped_urls(urls):
-    failed_picture_urls = []
-    for url in urls:
-        url_error_test = urlparse(url)
-        if 'youtube' in url_error_test.netloc or 'vimeo' in url_error_test.netloc:
-            failed_picture_urls.append(url)
-    return failed_picture_urls
-
-
 def load_nasa_epic_pictures(nasa_api_key, main_image_directory, nasa_epic_pic_name):
     payload = {'api_key': nasa_api_key}
     nasa_epic_url = f'https://api.nasa.gov/EPIC/api/natural/images'
@@ -80,13 +71,11 @@ def load_apod_urls(urls, main_image_directory, nasa_apod_dir_name):
                 download_picture(nasa_apod_url, apod_picture_name, picture_directory)
 
 
-def choose_random_picture_or_url(main_image_directory, space_pic_dirs, video_urls):
-    random_video_url = random.choice(video_urls)
+def choose_random_picture(main_image_directory, space_pic_dirs):
     random_picture_dir = random.choice(space_pic_dirs)
     random_pic = random.choice(os.listdir(f'{main_image_directory}/{random_picture_dir}'))
     chosen_random_picture = f'{main_image_directory}/{random_picture_dir}/{random_pic}'
-    random_post = random.choice([chosen_random_picture, random_video_url])
-    return random_post
+    return chosen_random_picture
 
 
 def get_picture_extension(picture_link):
@@ -95,16 +84,11 @@ def get_picture_extension(picture_link):
     return extension
 
 
-def upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot, video_urls):
-    random_post = choose_random_picture_or_url(main_image_directory, space_pic_dirs, video_urls)
-    urlparsed_random_post = urlparse(random_post)
-    if 'youtube' in urlparsed_random_post.netloc or 'vimeo' in urlparsed_random_post.netloc:
-        bot.send_message(text="Today we have a video about space for you to see!", chat_id=telegram_chat_id)
-        bot.send_message(text=random_post, chat_id=telegram_chat_id)
-    else:
-        with open(random_post) as document:
-            bot.send_message(text="Today we have a space picture for you to see!", chat_id=telegram_chat_id)
-            bot.send_document('rb', chat_id=telegram_chat_id, document=document)
+def upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot):
+    random_post = choose_random_picture(main_image_directory, space_pic_dirs)
+    with open(random_post) as document:
+        bot.send_message(text="Today we have a space picture for you to see!", chat_id=telegram_chat_id)
+        bot.send_document('rb', chat_id=telegram_chat_id, document=document)
 
 
 if __name__ == '__main__':
@@ -121,8 +105,7 @@ if __name__ == '__main__':
     while True:
         load_spacex_pictures(main_image_directory, spacex_dir_name, 64)
         apod_urls = load_nasa_apod_picture_urls(nasa_api_key, 50)
-        video_urls = get_video_trapped_urls(apod_urls)
         load_nasa_epic_pictures(nasa_api_key, main_image_directory, nasa_epic_dir_name)
         load_apod_urls(apod_urls, main_image_directory, nasa_apod_dir_name)
-        upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot, video_urls)
+        upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot)
         sleep(20)
