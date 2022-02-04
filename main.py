@@ -8,8 +8,6 @@ from dotenv import load_dotenv
 import telegram
 
 
-
-
 def load_spacex_pictures(main_image_directory, spacex_pic_name, launch_number):
     spacex_launch_url = f'https://api.spacexdata.com/v3/launches/{launch_number}'
     response = requests.get(spacex_launch_url)
@@ -22,16 +20,17 @@ def load_spacex_pictures(main_image_directory, spacex_pic_name, launch_number):
         download_picture(picture_link, picture_name, picture_directory)
 
 
-def load_nasa_apod_picture_urls(nasa_api_key, picture_amount):
+def get_nasa_apod_picture_urls(nasa_api_key, picture_amount):
     payload = {'api_key': nasa_api_key, 'count': picture_amount}
     nasa_apod_url = f'https://api.nasa.gov/planetary/apod'
     response = requests.get(nasa_apod_url, params=payload)
     response.raise_for_status()
     nasa_apod = response.json()
     urls = []
-    for iteration_index, nasa_apod in enumerate(nasa_apod):
+    for iteration_index, nasa_apod_info in enumerate(nasa_apod):
         try:
-            urls.append(nasa_apod['url'])
+            if nasa_apod_info['media_type'] == 'image':
+                urls.append(nasa_apod_info['url'])
         except KeyError:
             pass
     return urls
@@ -61,19 +60,17 @@ def download_picture(picture_link, picture_name, picture_directory, payload=''):
         filename.write(response.content)
 
 
-def load_apod_urls(urls, main_image_directory, nasa_apod_dir_name):
-    for iteration_index, nasa_apod_url in enumerate(urls):
-        url_error_test = urlparse(nasa_apod_url)
-        if 'youtube' not in url_error_test.netloc:
-            if 'vimeo' not in url_error_test.netloc:
-                apod_picture_name = f'nasa_apod_image_{iteration_index}'
-                picture_directory = f'{main_image_directory}/{nasa_apod_dir_name}'
-                download_picture(nasa_apod_url, apod_picture_name, picture_directory)
+def download_apod_urls(urls, main_image_directory, nasa_apod_dir_name):
+    for index, nasa_apod_url in enumerate(urls):
+        apod_picture_name = f'nasa_apod_image_{index}'
+        picture_directory = f'{main_image_directory}/{nasa_apod_dir_name}'
+        download_picture(nasa_apod_url, apod_picture_name, picture_directory)
 
 
 def choose_random_picture(main_image_directory, space_pic_dirs):
     random_picture_dir = random.choice(space_pic_dirs)
-    random_pic = random.choice(os.listdir(f'{main_image_directory}/{random_picture_dir}'))
+    formatted_pic_dir = os.listdir(f'{main_image_directory}/{random_picture_dir}')
+    random_pic = random.choice(formatted_pic_dir)
     chosen_random_picture = f'{main_image_directory}/{random_picture_dir}/{random_pic}'
     return chosen_random_picture
 
@@ -85,10 +82,10 @@ def get_picture_extension(picture_link):
 
 
 def upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot):
-    random_post = choose_random_picture(main_image_directory, space_pic_dirs)
-    with open(random_post) as document:
-        bot.send_message(text="Today we have a space picture for you to see!", chat_id=telegram_chat_id)
-        bot.send_document('rb', chat_id=telegram_chat_id, document=document)
+    new_post = choose_random_picture(main_image_directory, space_pic_dirs)
+    bot.send_message(text="Today we have a space picture for you to see!", chat_id=telegram_chat_id)
+    with open(new_post, 'rb') as document:
+        bot.send_document(chat_id=telegram_chat_id, document=document)
 
 
 if __name__ == '__main__':
@@ -100,12 +97,13 @@ if __name__ == '__main__':
     nasa_api_key = os.getenv('NASA_API_KEY')
     telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
     telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+    post_delay = float(os.getenv('POST_DELAY'))
     bot = telegram.Bot(token=telegram_bot_token)
     space_pic_dirs = [nasa_epic_dir_name, nasa_apod_dir_name, spacex_dir_name]
     while True:
         load_spacex_pictures(main_image_directory, spacex_dir_name, 64)
-        apod_urls = load_nasa_apod_picture_urls(nasa_api_key, 50)
+        apod_urls = get_nasa_apod_picture_urls(nasa_api_key, 50)
         load_nasa_epic_pictures(nasa_api_key, main_image_directory, nasa_epic_dir_name)
-        load_apod_urls(apod_urls, main_image_directory, nasa_apod_dir_name)
+        download_apod_urls(apod_urls, main_image_directory, nasa_apod_dir_name)
         upload_post_to_chat(main_image_directory, telegram_chat_id, space_pic_dirs, bot)
-        sleep(20)
+        sleep(post_delay)
